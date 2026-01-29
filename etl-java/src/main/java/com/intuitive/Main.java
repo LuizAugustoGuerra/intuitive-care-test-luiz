@@ -1,16 +1,31 @@
 package com.intuitive;
 
-import lombok.extern.java.Log;
-import java.util.logging.Level;
+import com.intuitive.core.Downloader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
 
-@Log 
 public class Main {
+    
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
-       
-        System.out.println("Olá, Intuitive Care! Ambiente configurado.");
+        logger.info("INICIANDO SISTEMA ETL");
+
+        Downloader downloader = new Downloader();
         
-        log.info("Lombok está funcionando corretamente! Bora codar.");
-        
-        log.log(Level.INFO, "Iniciando Pipeline de Dados...");
+        String urlReal = "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/3T2025.zip";
+        Path destino = Paths.get("../data/raw/3T2025.zip");
+
+        logger.info("Tentando baixar: " + urlReal);
+
+        boolean sucesso = downloader.downloadFile(urlReal, destino);
+
+        if (sucesso) {
+            logger.info("SUCESSO");
+            logger.info("Verifique a pasta 'data/raw'.");
+        } else {
+            logger.severe("FALHA NO DOWNLOAD");
+        }
     }
 }
