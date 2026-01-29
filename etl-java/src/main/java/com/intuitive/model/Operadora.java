@@ -5,13 +5,14 @@ import com.opencsv.bean.CsvBindByName;
 public class Operadora {
 
     
-    @CsvBindByName(column = "Registro ANS")
+    @CsvBindByName(column = "REGISTRO_OPERADORA")
     private String registroAns;
 
     @CsvBindByName(column = "CNPJ")
     private String cnpj;
 
-    @CsvBindByName(column = "Razão Social")
+    
+    @CsvBindByName(column = "Razao_Social")
     private String razaoSocial;
 
     @CsvBindByName(column = "UF")
@@ -20,7 +21,6 @@ public class Operadora {
     @CsvBindByName(column = "Modalidade")
     private String modalidade;
 
-   
     public String getRegistroAns() { return registroAns; }
     public void setRegistroAns(String registroAns) { this.registroAns = registroAns; }
 

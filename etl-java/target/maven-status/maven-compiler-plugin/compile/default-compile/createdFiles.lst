@@ -1,3 +1,7 @@
 com/intuitive/core/Downloader.class
+com/intuitive/core/CsvNormalizer.class
+com/intuitive/core/ZipExtractor.class
+com/intuitive/core/CadastralService.class
+com/intuitive/model/Operadora.class
 com/intuitive/Main.class
 com/intuitive/model/DemonstracaoContabil.class
