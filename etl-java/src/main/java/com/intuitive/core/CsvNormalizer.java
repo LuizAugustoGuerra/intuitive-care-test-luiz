@@ -112,7 +112,7 @@ public class CsvNormalizer {
             //trata valor
             String valorStr = line[mapa.get("VALOR")];
             valorStr = valorStr.replace(".", "").replace(",", "."); // Remove ponto de milhar, troca vírgula por ponto
-            demo.setValorDespesas(new BigDecimal(valorStr));
+            demo.setValor(new BigDecimal(valorStr));
 
             //trata Identificadores
             demo.setRazaoSocial(line[mapa.get("DESCRICAO")]); // Usando descrição como placeholder temporário

@@ -1,11 +1,12 @@
 package com.intuitive;
 
-import com.intuitive.core.CadastralService; // Novo!
+import com.intuitive.core.CadastralService;
 import com.intuitive.core.CsvNormalizer;
+import com.intuitive.core.DatabaseService; // Novo!
 import com.intuitive.core.Downloader;
 import com.intuitive.core.ZipExtractor;
 import com.intuitive.model.DemonstracaoContabil;
-import com.intuitive.model.Operadora;      // Novo!
+import com.intuitive.model.Operadora;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 
@@ -24,14 +25,14 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        logger.info("=== ETL INICIADO: AGORA COM ENRIQUECIMENTO DE DADOS ===");
+        logger.info("ETL INICIADO");
 
         Downloader downloader = new Downloader();
         ZipExtractor extractor = new ZipExtractor();
         CsvNormalizer normalizer = new CsvNormalizer();
-        CadastralService cadastralService = new CadastralService(); 
-        
-        
+        CadastralService cadastralService = new CadastralService();
+        DatabaseService dbService = new DatabaseService(); // Instanciando o banco
+
         List<String> urls = Arrays.asList(
             "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/1T2025.zip",
             "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/2T2025.zip",
@@ -44,21 +45,20 @@ public class Main {
         try {
             if (!Files.exists(pastaProcessed)) Files.createDirectories(pastaProcessed);
 
-          
-            logger.info("Carregando Cadastro de Operadoras");
+         
             cadastralService.carregarDados(downloader, pastaRaw);
 
-            
+           
             for (String url : urls) {
                 String nomeArquivo = url.substring(url.lastIndexOf("/") + 1);
                 Path arquivoZip = pastaRaw.resolve(nomeArquivo);
-
                 if (downloader.downloadFile(url, arquivoZip)) {
                     extractor.extractRelevantCsv(arquivoZip, pastaProcessed, "csv");
                 }
             }
 
-           
+           //normalizar e enriquecer
+
             List<DemonstracaoContabil> todosDados = new ArrayList<>();
             
             try (Stream<Path> paths = Files.walk(pastaProcessed)) {
@@ -68,41 +68,33 @@ public class Main {
                          logger.info("Processando: " + arquivo.getFileName());
                          List<DemonstracaoContabil> dados = normalizer.parse(arquivo);
                          
-                         
-                         int enriquecidos = 0;
                          for (DemonstracaoContabil item : dados) {
-                             
                              String registroAns = item.getCnpj(); 
-                             
                              Operadora op = cadastralService.buscarPorRegistro(registroAns);
                              
                              if (op != null) {
-                                
                                  item.setCnpj(op.getCnpj());
                                  item.setRazaoSocial(op.getRazaoSocial());
-                                 enriquecidos++;
                              } else {
-                                
                                  item.setRazaoSocial("OPERADORA NAO ENCONTRADA (Reg: " + registroAns + ")");
                              }
                          }
-                         
                          todosDados.addAll(dados);
-                         logger.info(" -> Registros: " + dados.size() + " (Enriquecidos: " + enriquecidos + ")");
                      });
             }
 
-           
             Path saidaFinal = Paths.get("../data/consolidado_despesas.csv");
             try (Writer writer = Files.newBufferedWriter(saidaFinal)) {
                 StatefulBeanToCsv<DemonstracaoContabil> beanToCsv = new StatefulBeanToCsvBuilder<DemonstracaoContabil>(writer)
                         .withSeparator(';')
                         .build();
-                
                 beanToCsv.write(todosDados);
-                logger.info("PROCESSO FINALIZADO");
-                logger.info("Arquivo gerado: " + saidaFinal.toAbsolutePath());
+                logger.info("Arquivo CSV gerado: " + saidaFinal.toAbsolutePath());
             }
+
+            logger.info("--- Iniciando Carga no Banco de Dados ---");
+            dbService.limparTabela();
+            dbService.inserirDados(todosDados);
 
         } catch (Exception e) {
             logger.severe("Erro fatal: " + e.getMessage());

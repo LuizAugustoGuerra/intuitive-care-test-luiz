@@ -1,3 +1,4 @@
+com/intuitive/core/DatabaseService.class
 com/intuitive/core/Downloader.class
 com/intuitive/core/CsvNormalizer.class
 com/intuitive/core/ZipExtractor.class
