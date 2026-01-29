@@ -3,6 +3,8 @@ package com.intuitive;
 import com.intuitive.core.Downloader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Main {
@@ -10,22 +12,29 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        logger.info("INICIANDO SISTEMA ETL");
+        logger.info("BAIXANDO ULTIMOS 3 TRIMESTRES");
 
         Downloader downloader = new Downloader();
         
-        String urlReal = "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/3T2025.zip";
-        Path destino = Paths.get("../data/raw/3T2025.zip");
+        // Lista das URLs
+        List<String> urls = Arrays.asList(
+            "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/1T2025.zip",
+            "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/2T2025.zip",
+            "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/2025/3T2025.zip"
+        );
 
-        logger.info("Tentando baixar: " + urlReal);
+        int sucessos = 0;
 
-        boolean sucesso = downloader.downloadFile(urlReal, destino);
+        for (String url : urls) {
+            // Extrai o nome do arquivo da URL
+            String nomeArquivo = url.substring(url.lastIndexOf("/") + 1);
+            Path destino = Paths.get("../data/raw/" + nomeArquivo);
 
-        if (sucesso) {
-            logger.info("SUCESSO");
-            logger.info("Verifique a pasta 'data/raw'.");
-        } else {
-            logger.severe("FALHA NO DOWNLOAD");
+            if (downloader.downloadFile(url, destino)) {
+                sucessos++;
+            }
         }
+
+        logger.info("Resumo: " + sucessos + "/" + urls.size() + " arquivos baixados com sucesso.");
     }
 }
