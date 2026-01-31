@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Intuitive Care</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8f9fa; }
+        .card-stat { transition: transform 0.2s; cursor: pointer; }
+        .card-stat:hover { transform: translateY(-5px); }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div v-if="loading" class="loading-overlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-dark bg-primary mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1"><i class="fas fa-heartbeat me-2"></i>Intuitive Care Analytics</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-success card-stat mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total de Despesas</h5>
+                        <p class="card-text display-6">{{ formatMoney(stats.total_geral) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-info card-stat mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Média por Operadora</h5>
+                        <p class="card-text display-6">{{ formatMoney(stats.media_por_operadora) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-white card-stat mb-3 border-start border-4 border-primary">
+                    <div class="card-body text-dark">
+                        <h5 class="card-title">Maior Despesa (Top 1)</h5>
+                        <p class="card-text fs-5" v-if="stats.top_5 && stats.top_5.length">
+                            {{ stats.top_5[0].razao_social }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="fas fa-chart-bar me-2"></i>Distribuição de Despesas por UF (Top 10)
+                    </div>
+                    <div class="card-body">
+                        <canvas id="ufChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fas fa-list me-2"></i>Lista de Operadoras</span>
+                <div class="input-group w-25">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Buscar na página..." v-model="searchQuery">
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>CNPJ</th>
+                                <th>Razão Social</th>
+                                <th>UF</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="op in filteredOperadoras" :key="op.cnpj">
+                                <td>{{ op.cnpj }}</td>
+                                <td>{{ op.razao_social }}</td>
+                                <td><span class="badge bg-secondary">{{ op.uf }}</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary" @click="verDetalhes(op.cnpj)">
+                                        <i class="fas fa-eye"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted">Página {{ meta.page }} de {{ meta.total_pages }} (Total: {{ meta.total }})</small>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" :disabled="meta.page === 1" @click="mudarPagina(meta.page - 1)">Anterior</button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" :disabled="meta.page === meta.total_pages" @click="mudarPagina(meta.page + 1)">Próximo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detalhesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" v-if="selectedOp">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">{{ selectedOp.razao_social }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light border">
+                        <strong>CNPJ:</strong> {{ selectedOp.cnpj }} <br>
+                        <strong>UF:</strong> {{ selectedOp.uf }} <br>
+                        <strong>Total Gasto:</strong> {{ formatMoney(selectedOp.total_gasto) }}
+                    </div>
+                    
+                    <h6 class="mt-4 border-bottom pb-2">Histórico de Despesas</h6>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Ano</th>
+                                <th>Trimestre</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="hist in history" :key="hist.trimestre">
+                                <td>{{ hist.ano }}</td>
+                                <td>{{ hist.trimestre }}</td>
+                                <td class="text-end text-success fw-bold">{{ formatMoney(hist.valor) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@3.2.0/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const { createApp } = Vue;
+    const API_URL = 'http://localhost:5000';
+
+    createApp({
+        data() {
+            return {
+                loading: false,
+                searchQuery: '',
+                stats: {},
+                operadoras: [],
+                meta: { page: 1, limit: 10, total: 0, total_pages: 1 },
+                selectedOp: null,
+                history: [],
+                chartInstance: null
+            }
+        },
+        computed: {
+            filteredOperadoras() {
+                if (!this.searchQuery) return this.operadoras;
+                const query = this.searchQuery.toLowerCase();
+                return this.operadoras.filter(op => 
+                    op.razao_social.toLowerCase().includes(query) || 
+                    op.cnpj.includes(query)
+                );
+            }
+        },
+        methods: {
+            formatMoney(value) {
+                if (!value) return 'R$ 0,00';
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+            },
+            
+            async carregarDados() {
+                this.loading = true;
+                try {
+                    const resStats = await axios.get(`${API_URL}/api/estatisticas`);
+                    this.stats = resStats.data;
+
+                    await this.mudarPagina(1);
+
+                    // Carrega dados para o Gráfico
+                    const resGrafico = await axios.get(`${API_URL}/api/por-uf`); 
+                    this.renderizarGrafico(resGrafico.data.slice(0, 10)); 
+
+                } catch (error) {
+                    console.error(error);
+                    alert('Erro ao conectar com o servidor. Verifique se o Python está rodando na porta 5000.');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async mudarPagina(page) {
+                if (page < 1 || (page > this.meta.total_pages && this.meta.total_pages > 0)) return;
+                this.loading = true;
+                try {
+                    const res = await axios.get(`${API_URL}/api/operadoras?page=${page}&limit=10`);
+                    this.operadoras = res.data.data;
+                    this.meta = res.data.meta;
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async verDetalhes(cnpj) {
+                this.loading = true;
+                try {
+                    const resOp = await axios.get(`${API_URL}/api/operadoras/${cnpj}`);
+                    const resHist = await axios.get(`${API_URL}/api/operadoras/${cnpj}/despesas`);
+                    
+                    this.selectedOp = resOp.data;
+                    this.history = resHist.data;
+
+                    const modal = new bootstrap.Modal(document.getElementById('detalhesModal'));
+                    modal.show();
+                } catch (error) {
+                    alert('Erro ao carregar detalhes');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            renderizarGrafico(dados) {
+                const ctx = document.getElementById('ufChart').getContext('2d');
+                if (this.chartInstance) this.chartInstance.destroy();
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dados.map(d => d.uf),
+                        datasets: [{
+                            label: 'Total de Despesas (R$)',
+                            data: dados.map(d => d.total),
+                            backgroundColor: '#0d6efd',
+                            borderRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        },
+        mounted() {
+            this.carregarDados();
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>

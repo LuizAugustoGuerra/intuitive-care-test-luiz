@@ -72,12 +72,14 @@ public class Main {
                              String registroAns = item.getCnpj(); 
                              Operadora op = cadastralService.buscarPorRegistro(registroAns);
                              
-                             if (op != null) {
-                                 item.setCnpj(op.getCnpj());
-                                 item.setRazaoSocial(op.getRazaoSocial());
-                             } else {
-                                 item.setRazaoSocial("OPERADORA NAO ENCONTRADA (Reg: " + registroAns + ")");
-                             }
+                            if (op != null) {
+                                item.setCnpj(op.getCnpj());
+                                item.setRazaoSocial(op.getRazaoSocial());
+                                item.setUf(op.getUf()); // <--- A LINHA MÁGICA NOVA É ESSA AQUI
+                            } else {
+                                item.setRazaoSocial("OPERADORA NAO ENCONTRADA (Reg: " + registroAns + ")");
+                                item.setUf("ND"); // <--- Importante para não quebrar o banco
+}
                          }
                          todosDados.addAll(dados);
                      });

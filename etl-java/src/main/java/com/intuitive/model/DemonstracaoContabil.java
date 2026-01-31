@@ -1,7 +1,7 @@
 package com.intuitive.model;
 
 import com.opencsv.bean.CsvBindByName;
-import java.math.BigDecimal; // Importante!
+import java.math.BigDecimal;
 
 public class DemonstracaoContabil {
 
@@ -13,53 +13,33 @@ public class DemonstracaoContabil {
 
     @CsvBindByName(column = "RAZAOSOCIAL")
     private String razaoSocial;
+    
+    // NOVO CAMPO: UF (Estado)
+    @CsvBindByName(column = "UF")
+    private String uf;
 
     @CsvBindByName(column = "TRIMESTRE")
     private String trimestre;
 
-    
     @CsvBindByName(column = "VALOR DESPESAS")
     private BigDecimal valor;
 
-   
 
-    public int getAno() {
-        return ano;
-    }
+    public int getAno() { return ano; }
+    public void setAno(int ano) { this.ano = ano; }
 
-    public void setAno(int ano) {
-        this.ano = ano;
-    }
+    public String getCnpj() { return cnpj; }
+    public void setCnpj(String cnpj) { this.cnpj = cnpj; }
 
-    public String getCnpj() {
-        return cnpj;
-    }
+    public String getRazaoSocial() { return razaoSocial; }
+    public void setRazaoSocial(String razaoSocial) { this.razaoSocial = razaoSocial; }
+    
+    public String getUf() { return uf; }
+    public void setUf(String uf) { this.uf = uf; }
 
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
+    public String getTrimestre() { return trimestre; }
+    public void setTrimestre(String trimestre) { this.trimestre = trimestre; }
 
-    public String getRazaoSocial() {
-        return razaoSocial;
-    }
-
-    public void setRazaoSocial(String razaoSocial) {
-        this.razaoSocial = razaoSocial;
-    }
-
-    public String getTrimestre() {
-        return trimestre;
-    }
-
-    public void setTrimestre(String trimestre) {
-        this.trimestre = trimestre;
-    }
-
-    public BigDecimal getValor() {
-        return valor;
-    }
-
-    public void setValor(BigDecimal valor) {
-        this.valor = valor;
-    }
+    public BigDecimal getValor() { return valor; }
+    public void setValor(BigDecimal valor) { this.valor = valor; }
 }
