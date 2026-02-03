@@ -18,7 +18,7 @@ public class DatabaseService {
     private static final String PASS = "password";
 
     public void inserirDados(List<DemonstracaoContabil> dados) {
-        // CORREÇÃO: Adicionado o campo UF no SQL
+       
         String sql = "INSERT INTO despesas (ano, cnpj, razao_social, uf, trimestre, valor) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DriverManager.getConnection(URL, USER, PASS);
@@ -33,7 +33,7 @@ public class DatabaseService {
                 stmt.setString(2, item.getCnpj());
                 stmt.setString(3, item.getRazaoSocial());
                 
-                // NOVO: Setando a UF (se for nulo, salvamos como "ND" - Não Definido)
+                
                 String ufParaSalvar = (item.getUf() != null) ? item.getUf() : "ND";
                 stmt.setString(4, ufParaSalvar);
                 

@@ -12,7 +12,7 @@ db_config = {
 }
 
 def gerar_relatorio_estatistico():
-    print("--- Iniciando Processamento Estatístico (Python) ---")
+    print("Iniciando Processamento Estatístico")
     
     try:
         conn = mysql.connector.connect(**db_config)

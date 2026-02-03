@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 app = Flask(__name__)
 CORS(app)
 
-# --- CORREÇÃO 1: charset='utf8' para tentar arrumar os acentos ---
 db_config = {
     'user': 'user',
     'password': 'password',
@@ -25,7 +24,7 @@ def get_db_connection():
 def home():
     return "API Online. Use o Frontend na porta 8000."
 
-# --- CORREÇÃO 2: A Rota que Faltava para o Gráfico ---
+
 @app.route('/api/por-uf', methods=['GET'])
 def get_por_uf():
     conn = get_db_connection()
@@ -49,7 +48,7 @@ def get_por_uf():
         
     return jsonify(resultado)
 
-# --- ROTAS EXISTENTES ---
+#  ROTAS EXISTENTES 
 
 @app.route('/api/operadoras', methods=['GET'])
 def get_operadoras():

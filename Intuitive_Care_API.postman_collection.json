@@ -1,0 +1,145 @@
+{
+	"info": {
+		"_postman_id": "b5a7d9f1-23c4-4d5e-9f8a-1b2c3d4e5f6a",
+		"name": "Intuitive Care API - Luiz Guerra",
+		"description": "Coleção de testes para a API de Despesas da ANS.\nCandidato: Luiz Augusto Guerra",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Status da API (Health Check)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Listar Operadoras (Paginado)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/operadoras?page=1&limit=5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"operadoras"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"description": "Número da página"
+						},
+						{
+							"key": "limit",
+							"value": "5",
+							"description": "Itens por página"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Detalhes da Operadora (Por CNPJ)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/operadoras/32644280000140",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"operadoras",
+						"32644280000140"
+					],
+					"description": "Exemplo de CNPJ. Substitua pelo CNPJ desejado."
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Histórico de Despesas (Por CNPJ)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/operadoras/32644280000140/despesas",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"operadoras",
+						"32644280000140",
+						"despesas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Estatísticas Gerais (Dashboard)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/estatisticas",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"estatisticas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Dados para Gráfico (Por UF)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/por-uf",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"por-uf"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

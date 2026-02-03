@@ -15,7 +15,7 @@ import java.util.logging.Level;
 
 public class Downloader {
 
-    // Criamos o logger manualmente
+    
     private static final Logger logger = Logger.getLogger(Downloader.class.getName());
     private final HttpClient client;
 

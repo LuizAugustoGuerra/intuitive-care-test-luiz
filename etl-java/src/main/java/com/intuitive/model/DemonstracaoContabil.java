@@ -14,7 +14,7 @@ public class DemonstracaoContabil {
     @CsvBindByName(column = "RAZAOSOCIAL")
     private String razaoSocial;
     
-    // NOVO CAMPO: UF (Estado)
+   
     @CsvBindByName(column = "UF")
     private String uf;
 
